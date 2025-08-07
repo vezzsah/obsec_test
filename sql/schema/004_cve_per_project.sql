@@ -10,8 +10,8 @@ CREATE TABLE cve_per_project (
     solved BOOLEAN NOT NULL DEFAULT false,
     
     PRIMARY KEY(id),
-    FOREIGN KEY (cpe) REFERENCES projects(id) ON DELETE CASCADE
+    FOREIGN KEY (project) REFERENCES projects(id) ON DELETE CASCADE
 );
 
 -- +goose Down
-DROP TABLE cve_per_cpe;
+DROP TABLE cve_per_project;

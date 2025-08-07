@@ -24,7 +24,7 @@ func (cfg *ApiConfig) GetProjectCPEs(w http.ResponseWriter, r *http.Request, use
 			return
 		}
 
-		cves, err := cfg.DbQueries.GetAllCPEByProject(r.Context(), proj.ID)
+		cves, err := cfg.DbQueries.GetAllCPEByProject(r.Context(), *proj.ID)
 		if err != nil {
 			utils.RespondWithError(w, err, http.StatusInternalServerError, "internal error")
 		}
@@ -46,14 +46,14 @@ func (cfg *ApiConfig) RegisterCPE(w http.ResponseWriter, r *http.Request, user_i
 	}
 
 	found, err := cfg.DbQueries.CheckIfProjectExistByUserIdAndName(r.Context(), database.CheckIfProjectExistByUserIdAndNameParams{
-		Creator:     user_id,
+		Creator:     user_id.String(),
 		ProjectName: params.ProjectName,
 	})
 	if err != nil {
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "problem while accessing DB")
 		return
 	}
-	if !found {
+	if found == 0 {
 		utils.RespondWithError(w, err, http.StatusUnauthorized, "unauthorized")
 		return
 	}
@@ -85,14 +85,14 @@ func (cfg *ApiConfig) RegisterCPE(w http.ResponseWriter, r *http.Request, user_i
 		}
 		found, err = cfg.DbQueries.CheckIfCPEExistByProjectName(r.Context(), database.CheckIfCPEExistByProjectNameParams{
 			Cpe:       cpeString,
-			ProjectID: project.ID,
+			ProjectID: *project.ID,
 		})
 		if err != nil {
 			utils.RespondWithError(w, err, http.StatusInternalServerError, "error while cheking validity project")
 			return
 		}
-		if found {
-			utils.RespondWithError(w, err, http.StatusConflict, "project name already in use")
+		if found == 1 {
+			utils.RespondWithError(w, err, http.StatusConflict, "project already has the CPE in use")
 			return
 		}
 	}
@@ -104,7 +104,7 @@ func (cfg *ApiConfig) RegisterCPE(w http.ResponseWriter, r *http.Request, user_i
 			Cpe:       cpestring,
 			CreatedAt: time.Now().UTC().Format(time.RFC3339),
 			UpdatedAt: time.Now().UTC().Format(time.RFC3339),
-			ProjectID: project.ID,
+			ProjectID: *project.ID,
 		})
 		if err != nil {
 			utils.RespondWithError(w, err, http.StatusInternalServerError, "error while storing cpe")
@@ -124,7 +124,7 @@ func (cfg *ApiConfig) RegisterCPE(w http.ResponseWriter, r *http.Request, user_i
 					CreatedAt: time.Now().UTC().Format(time.RFC3339),
 					UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 					Cpe:       storedCpe.ID,
-					Project:   project.ID,
+					Project:   *project.ID,
 				})
 				if err != nil {
 					utils.RespondWithError(w, err, http.StatusInternalServerError, "error while storing CVEs")
@@ -171,5 +171,8 @@ func GenerateCPEString(cpe CPE) string {
 	if cpe.Language != "" {
 		language = cpe.Language
 	}
-	return fmt.Sprintf("cpe:2.3:%s:%s:%s:%s:%s:%s:%s", part, vendor, product, version, update, edition, language)
+	if product == "mercado_pago_payments_for_woocommerce" {
+		return fmt.Sprintf("cpe:2.3:%s:%s:%s:%s:%s:%s:%s:*:wordpress:*:*", part, vendor, product, version, update, edition, language)
+	}
+	return fmt.Sprintf("cpe:2.3:%s:%s:%s:%s:%s:%s:%s:*:*:*:*", part, vendor, product, version, update, edition, language)
 }

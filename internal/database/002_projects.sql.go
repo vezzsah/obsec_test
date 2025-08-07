@@ -7,55 +7,53 @@ package database
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const checkIfProjectExistByName = `-- name: CheckIfProjectExistByName :one
 SELECT EXISTS (Select 1 from projects
-where project_name = $1)
+where project_name = ?)
 `
 
-func (q *Queries) CheckIfProjectExistByName(ctx context.Context, projectName string) (bool, error) {
+func (q *Queries) CheckIfProjectExistByName(ctx context.Context, projectName string) (int64, error) {
 	row := q.db.QueryRowContext(ctx, checkIfProjectExistByName, projectName)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const checkIfProjectExistByUserIdAndName = `-- name: CheckIfProjectExistByUserIdAndName :one
 SELECT EXISTS (Select 1 from projects
-where creator = $1 and project_name = $2)
+where creator = ? and project_name = ?)
 `
 
 type CheckIfProjectExistByUserIdAndNameParams struct {
-	Creator     uuid.UUID `json:"creator"`
-	ProjectName string    `json:"project_name"`
+	Creator     interface{} `json:"creator"`
+	ProjectName string      `json:"project_name"`
 }
 
-func (q *Queries) CheckIfProjectExistByUserIdAndName(ctx context.Context, arg CheckIfProjectExistByUserIdAndNameParams) (bool, error) {
+func (q *Queries) CheckIfProjectExistByUserIdAndName(ctx context.Context, arg CheckIfProjectExistByUserIdAndNameParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, checkIfProjectExistByUserIdAndName, arg.Creator, arg.ProjectName)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const createProject = `-- name: CreateProject :one
 INSERT INTO projects (project_name, created_at, updated_at, creator)
 VALUES (
-    $1,
-    $2,
-    $3,
-    $4
+    ?,
+    ?,
+    ?,
+    ?
 )
 RETURNING id, project_name, created_at, updated_at, creator
 `
 
 type CreateProjectParams struct {
-	ProjectName string    `json:"project_name"`
-	CreatedAt   string    `json:"created_at"`
-	UpdatedAt   string    `json:"updated_at"`
-	Creator     uuid.UUID `json:"creator"`
+	ProjectName string      `json:"project_name"`
+	CreatedAt   string      `json:"created_at"`
+	UpdatedAt   string      `json:"updated_at"`
+	Creator     interface{} `json:"creator"`
 }
 
 func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error) {
@@ -77,10 +75,10 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 }
 
 const getProjectById = `-- name: GetProjectById :one
-SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE id = $1
+SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE id = ?
 `
 
-func (q *Queries) GetProjectById(ctx context.Context, id string) (Project, error) {
+func (q *Queries) GetProjectById(ctx context.Context, id *string) (Project, error) {
 	row := q.db.QueryRowContext(ctx, getProjectById, id)
 	var i Project
 	err := row.Scan(
@@ -94,12 +92,12 @@ func (q *Queries) GetProjectById(ctx context.Context, id string) (Project, error
 }
 
 const getProjectByNameAndCreator = `-- name: GetProjectByNameAndCreator :one
-SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE project_name = $1 and creator = $2
+SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE project_name = ? and creator = ?
 `
 
 type GetProjectByNameAndCreatorParams struct {
-	ProjectName string    `json:"project_name"`
-	Creator     uuid.UUID `json:"creator"`
+	ProjectName string      `json:"project_name"`
+	Creator     interface{} `json:"creator"`
 }
 
 func (q *Queries) GetProjectByNameAndCreator(ctx context.Context, arg GetProjectByNameAndCreatorParams) (Project, error) {
@@ -116,10 +114,10 @@ func (q *Queries) GetProjectByNameAndCreator(ctx context.Context, arg GetProject
 }
 
 const getProjectsByUser = `-- name: GetProjectsByUser :many
-SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE creator = $1
+SELECT id, project_name, created_at, updated_at, creator FROM projects WHERE creator = ?
 `
 
-func (q *Queries) GetProjectsByUser(ctx context.Context, creator uuid.UUID) ([]Project, error) {
+func (q *Queries) GetProjectsByUser(ctx context.Context, creator interface{}) ([]Project, error) {
 	rows, err := q.db.QueryContext(ctx, getProjectsByUser, creator)
 	if err != nil {
 		return nil, err

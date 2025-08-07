@@ -1,0 +1,68 @@
+name: cd
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      GOFLAGS: -mod=vendor
+      GOPROXY: "https://proxy.golang.org,direct"
+      
+    steps:
+      - name: Check out code.
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.0"
+
+      - name: Build app.
+        run: ./scripts/buildprod.sh
+
+      - name: Set up Goose.
+        run: go install github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: Run DB Migration.
+        run: ./scripts/migrateup.sh
+
+      - name: 'GCP Auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: "Connect to GKE"
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+            cluster_name: ""
+            location: us-central1
+            project_id: "" #TODO UPDATE AS REQUIRED
+
+      - name: 'Upload image to registry'
+        run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-467523/notely-ar-repo/notely:latest . #CORRECT THIS LINE
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.3.0
+        with:
+          version: "v3.18.4"
+      
+      - name: Deploy Helm
+        run: |
+          Multi Line HERE 
+      
+      - name: Monitor Deployment
+        run: |
+          Kubectl get deploy -n ${GITHUB_REPOSITORY#*/} --no-headers
+
+      #- name: Deploy to Cloud Run
+      #  run: gcloud run deploy notely --image us-central1-docker.pkg.dev/notely-467523/notely-ar-repo/notely:latest --region us-central1 --allow-unauthenticated --project notely-467523 --max-instances=4

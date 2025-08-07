@@ -27,7 +27,7 @@ func (cfg *ApiConfig) CreateProject(w http.ResponseWriter, r *http.Request, user
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "error while storing project")
 		return
 	}
-	if found {
+	if found == 1 {
 		utils.RespondWithError(w, err, http.StatusConflict, "project name already in use")
 		return
 	}

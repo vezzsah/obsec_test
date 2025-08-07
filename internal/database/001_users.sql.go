@@ -7,46 +7,52 @@ package database
 
 import (
 	"context"
-	"time"
 )
 
 const checkIfUserExistByEmail = `-- name: CheckIfUserExistByEmail :one
 SELECT EXISTS (Select 1 from users
-where email = $1)
+where email = ?)
 `
 
-func (q *Queries) CheckIfUserExistByEmail(ctx context.Context, email string) (bool, error) {
+func (q *Queries) CheckIfUserExistByEmail(ctx context.Context, email string) (int64, error) {
 	row := q.db.QueryRowContext(ctx, checkIfUserExistByEmail, email)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (created_at, updated_at, email, hashedP)
 VALUES (
-    NOW(),
-    NOW(),
-    $1,
-    $2
+    ?,
+    ?,
+    ?,
+    ?
 )
 RETURNING id, created_at, updated_at, email
 `
 
 type CreateUserParams struct {
-	Email   string `json:"email"`
-	Hashedp string `json:"hashedp"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Email     string `json:"email"`
+	Hashedp   string `json:"hashedp"`
 }
 
 type CreateUserRow struct {
-	ID        string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID        *string `json:"id"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at"`
+	Email     string  `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.Hashedp)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Email,
+		arg.Hashedp,
+	)
 	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
@@ -67,7 +73,7 @@ func (q *Queries) DeleteAllUsers(ctx context.Context) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, created_at, updated_at, email, hashedp FROM users WHERE email = $1
+SELECT id, created_at, updated_at, email, hashedp FROM users WHERE email = ?
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {

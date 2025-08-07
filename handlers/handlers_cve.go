@@ -23,7 +23,7 @@ func (cfg *ApiConfig) GetProjectCVEs(w http.ResponseWriter, r *http.Request, use
 		return
 	}
 
-	res, err := cfg.DbQueries.GetAllCVEByProject(r.Context(), proj.ID)
+	res, err := cfg.DbQueries.GetAllCVEByProject(r.Context(), *proj.ID)
 	if err != nil {
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "error while fetching CVEs")
 	}
@@ -52,9 +52,9 @@ func (cfg *ApiConfig) ResolveProjectCVE(w http.ResponseWriter, r *http.Request, 
 
 	err = cfg.DbQueries.UpdateCVE(r.Context(), database.UpdateCVEParams{
 		Solved:  true,
-		Cve:     dbRes.Cvestring.String,
-		Project: dbRes.Projectid,
-		Cpe:     dbRes.Cpeid.String,
+		Cve:     *dbRes.Cvestring,
+		Project: *dbRes.Projectid,
+		Cpe:     *dbRes.Cpeid,
 	})
 	if err != nil {
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "error while updating CVE")

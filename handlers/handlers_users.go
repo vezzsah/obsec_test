@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -20,7 +21,7 @@ func (cfg *ApiConfig) CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	found, err := cfg.DbQueries.CheckIfUserExistByEmail(r.Context(), param.Email)
-	if err != nil || found {
+	if err != nil || found == 1 {
 		utils.RespondWithError(w, err, http.StatusConflict, "email already in use")
 		return
 	}
@@ -31,11 +32,17 @@ func (cfg *ApiConfig) CreateNewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdUser, err := cfg.DbQueries.CreateUser(r.Context(), database.CreateUserParams{
-		Email:   param.Email,
-		Hashedp: param.Password,
-	})
+	dbparams := database.CreateUserParams{
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
+		Email:     param.Email,
+		Hashedp:   param.Password,
+	}
+	log.Printf("dbParams: %v", dbparams)
+	createdUser, err := cfg.DbQueries.CreateUser(r.Context(), dbparams)
 	if err != nil {
+		log.Printf("user: %v", createdUser)
+		log.Printf("time: %s", time.Now().UTC().Format(time.RFC3339))
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "something went wrong while storing user")
 		return
 	}
@@ -64,20 +71,20 @@ func (cfg *ApiConfig) LogInUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwtToken, err := auth.MakeJWT(user.ID)
+	jwtToken, err := auth.MakeJWT(*user.ID)
 	if err != nil {
 		utils.RespondWithError(w, err, http.StatusInternalServerError, "something went wrong")
 		return
 	}
 
 	userWithoutPass := struct {
-		ID        string    `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Email     string    `json:"email"`
-		Token     string    `json:"token"`
+		ID        string `json:"id"`
+		CreatedAt string `json:"created_at"`
+		UpdatedAt string `json:"updated_at"`
+		Email     string `json:"email"`
+		Token     string `json:"token"`
 	}{
-		ID:        user.ID,
+		ID:        *user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,

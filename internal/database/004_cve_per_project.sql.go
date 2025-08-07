@@ -7,13 +7,10 @@ package database
 
 import (
 	"context"
-	"database/sql"
-
-	"github.com/google/uuid"
 )
 
 const getAllCVEByProject = `-- name: GetAllCVEByProject :many
-SELECT id, cve, descrip, created_at, updated_at, cpe, project, solved FROM cve_per_project WHERE project = $1 AND solved = false
+SELECT id, cve, descrip, created_at, updated_at, cpe, project, solved FROM cve_per_project WHERE project = ? AND solved = false
 `
 
 func (q *Queries) GetAllCVEByProject(ctx context.Context, project string) ([]CvePerProject, error) {
@@ -52,24 +49,24 @@ const getProjectAndCPE = `-- name: GetProjectAndCPE :one
 SELECT p.id as projectID, cpe.id as CPEID, cve.id as CVEID, cve.cve as CVEString FROM projects as p 
 LEFT JOIN cpe_per_project cpe ON cpe.project_id = p.id
 LEFT JOIN cve_per_project cve ON cve.project = p.id
-WHERE p.project_name = $1 
-AND p.creator = $2
-AND cpe.cpe = $3
-AND cve.cve = $4
+WHERE p.project_name = ?
+AND p.creator = ?
+AND cpe.cpe = ?
+AND cve.cve = ?
 `
 
 type GetProjectAndCPEParams struct {
-	ProjectName string    `json:"project_name"`
-	Creator     uuid.UUID `json:"creator"`
-	Cpe         string    `json:"cpe"`
-	Cve         string    `json:"cve"`
+	ProjectName string      `json:"project_name"`
+	Creator     interface{} `json:"creator"`
+	Cpe         string      `json:"cpe"`
+	Cve         string      `json:"cve"`
 }
 
 type GetProjectAndCPERow struct {
-	Projectid string         `json:"projectid"`
-	Cpeid     sql.NullString `json:"cpeid"`
-	Cveid     sql.NullString `json:"cveid"`
-	Cvestring sql.NullString `json:"cvestring"`
+	Projectid *string `json:"projectid"`
+	Cpeid     *string `json:"cpeid"`
+	Cveid     *string `json:"cveid"`
+	Cvestring *string `json:"cvestring"`
 }
 
 func (q *Queries) GetProjectAndCPE(ctx context.Context, arg GetProjectAndCPEParams) (GetProjectAndCPERow, error) {
@@ -92,13 +89,13 @@ func (q *Queries) GetProjectAndCPE(ctx context.Context, arg GetProjectAndCPEPara
 const storeCVE = `-- name: StoreCVE :one
 INSERT INTO cve_per_project (id, cve, descrip, created_at, updated_at, cpe, project)
 VALUES (
-    $1,
-    $2,
-    $3,
-    $4, 
-    $5,
-    $6,
-    $7
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?
 )
 RETURNING id, cve, descrip, created_at, updated_at, cpe, project, solved
 `
@@ -138,7 +135,7 @@ func (q *Queries) StoreCVE(ctx context.Context, arg StoreCVEParams) (CvePerProje
 }
 
 const updateCVE = `-- name: UpdateCVE :exec
-UPDATE cve_per_project SET solved = $1 WHERE cve = $2 AND project = $3 AND CPE = $4
+UPDATE cve_per_project SET solved = ? WHERE cve = ? AND project = ? AND CPE = ?
 `
 
 type UpdateCVEParams struct {

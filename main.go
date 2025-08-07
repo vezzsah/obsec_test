@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/vezzsah/obsec_test/handlers"
 	"github.com/vezzsah/obsec_test/internal/database"
@@ -49,39 +51,43 @@ func main() {
 		log.Println("Connected to database")
 	}
 
-	mux := http.NewServeMux()
+	router := chi.NewRouter()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+
+	v1Router := chi.NewRouter()
 
 	if apiCfg.DbQueries != nil {
-		/*Users Management*/
-		mux.HandleFunc("DELETE /api/users", apiCfg.ResetUsers)
-		mux.HandleFunc("POST /api/users", apiCfg.CreateNewUser)
-		mux.HandleFunc("POST /api/login", apiCfg.LogInUser)
+		v1Router.Delete("/users", apiCfg.ResetUsers)
+		v1Router.Post("/users", apiCfg.CreateNewUser)
+		v1Router.Post("/login", apiCfg.LogInUser)
 
-		/*Project Management*/
-		mux.HandleFunc("POST /api/projects", apiCfg.MiddlewareAuth(apiCfg.CreateProject))
-		mux.HandleFunc("GET /api/projects", apiCfg.MiddlewareAuth(apiCfg.ViewProject))
+		v1Router.Post("/projects", apiCfg.MiddlewareAuth(apiCfg.CreateProject))
+		v1Router.Get("/projects", apiCfg.MiddlewareAuth(apiCfg.ViewProject))
 
-		/*CPE per Project, Management*/
-		mux.HandleFunc("POST /api/projects/cpes", apiCfg.MiddlewareAuth(apiCfg.RegisterCPE))
-		mux.HandleFunc("GET /api/projects/cpes", apiCfg.MiddlewareAuth(apiCfg.GetProjectCPEs))
+		v1Router.Post("/projects/cpes", apiCfg.MiddlewareAuth(apiCfg.RegisterCPE))
+		v1Router.Get("/projects/cpes", apiCfg.MiddlewareAuth(apiCfg.GetProjectCPEs))
 
-		/*TODO: CPE Search*/
-		//mux.HandleFunc("GET /api/cpes", apiCfg.MiddlewareAuth(apiCfg.SearchCPE))
-
-		/*CVE per Project Management*/
-		mux.HandleFunc("GET /api/projects/cve", apiCfg.MiddlewareAuth(apiCfg.GetProjectCVEs))
-		mux.HandleFunc("POST /api/projects/cve", apiCfg.MiddlewareAuth(apiCfg.ResolveProjectCVE))
+		v1Router.Post("/projects/cves", apiCfg.MiddlewareAuth(apiCfg.ResolveProjectCVE))
+		v1Router.Get("/projects/cves", apiCfg.MiddlewareAuth(apiCfg.GetProjectCVEs))
 	}
 
-	server := &http.Server{
+	v1Router.Get("/healthz", handlers.HandlerReadiness)
+
+	router.Mount("/v1", v1Router)
+	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           mux,
+		Handler:           router,
 		ReadHeaderTimeout: time.Minute,
 	}
 
-	log.Println("Ready")
-	err = server.ListenAndServe()
-	if err == http.ErrServerClosed {
-		return
-	}
+	log.Printf("Serving on port: %s\n", port)
+	log.Fatal(srv.ListenAndServe())
 }
