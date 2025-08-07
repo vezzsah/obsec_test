@@ -1,0 +1,4 @@
+.env
+obsec-chart/templates/configmap.yaml
+obsec-server
+.github/*

@@ -1,0 +1,26 @@
+replicaCount: 1
+
+fullname: obsec-service
+namespace: obsec-challenge
+configmapName: obsec-service-configmap
+
+tokenType: "obsec-api-access"
+
+image:
+  repository: gomaeba/obsec-server
+  pullPolicy: Always
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  nodePort: 30080
+
+envPort: '8080'
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
