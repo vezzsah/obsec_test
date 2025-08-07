@@ -1,13 +1,14 @@
 package nistlayer
 
 import (
+	"log"
 	"slices"
 )
 
 func ValidateIfCPEExists(cpe_to_check string) bool {
 
 	existingCpes := []string{
-		"cpe:2.3:a:mercadolibre:mercadolibre:3.8.7:*:*:*:*:android:*:*",
+		"cpe:2.3:a:mercadolibre:mercadolibre:3.8.7:*:*:*:*:*:*:*",
 		"cpe:2.3:a:mercadopago:mercado_pago_payments_for_woocommerce:6.7.1:*:*:*:*:wordpress:*:*",
 		"cpe:2.3:a:mercadopago:mercado_pago_payments_for_woocommerce:4.1.0:*:*:*:*:wordpress:*:*",
 		"cpe:2.3:a:mercadopago:mercado_pago_payments_for_woocommerce:6.4.0:*:*:*:*:wordpress:*:*",
@@ -58,6 +59,8 @@ func ValidateIfCPEExists(cpe_to_check string) bool {
 		"cpe:2.3:a:mercadopago:mercado_pago_payments_for_woocommerce:5.6.1:*:*:*:*:wordpress:*:*",
 		"cpe:2.3:a:mercadopago:mercado_pago_payments_for_woocommerce:5.1.0:*:*:*:*:wordpress:*:*",
 	}
+
+	log.Printf("cpe_to_check: %s", cpe_to_check)
 
 	return slices.Contains(existingCpes, cpe_to_check)
 }

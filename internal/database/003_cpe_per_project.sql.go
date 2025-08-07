@@ -11,7 +11,7 @@ import (
 
 const checkIfCPEExistByProjectName = `-- name: CheckIfCPEExistByProjectName :one
 SELECT EXISTS (Select 1 from cpe_per_project
-where cpe = $1 and project_id = $2)
+where cpe = ? and project_id = ?)
 `
 
 type CheckIfCPEExistByProjectNameParams struct {
@@ -19,15 +19,15 @@ type CheckIfCPEExistByProjectNameParams struct {
 	ProjectID string `json:"project_id"`
 }
 
-func (q *Queries) CheckIfCPEExistByProjectName(ctx context.Context, arg CheckIfCPEExistByProjectNameParams) (bool, error) {
+func (q *Queries) CheckIfCPEExistByProjectName(ctx context.Context, arg CheckIfCPEExistByProjectNameParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, checkIfCPEExistByProjectName, arg.Cpe, arg.ProjectID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const getAllCPEByProject = `-- name: GetAllCPEByProject :many
-SELECT id, cpe, created_at, updated_at, project_id FROM cpe_per_project WHERE project_id = $1
+SELECT id, cpe, created_at, updated_at, project_id FROM cpe_per_project WHERE project_id = ?
 `
 
 func (q *Queries) GetAllCPEByProject(ctx context.Context, projectID string) ([]CpePerProject, error) {
@@ -60,7 +60,7 @@ func (q *Queries) GetAllCPEByProject(ctx context.Context, projectID string) ([]C
 }
 
 const getCPEById = `-- name: GetCPEById :one
-SELECT id, cpe, created_at, updated_at, project_id FROM cpe_per_project WHERE id = $1
+SELECT id, cpe, created_at, updated_at, project_id FROM cpe_per_project WHERE id = ?
 `
 
 func (q *Queries) GetCPEById(ctx context.Context, id string) (CpePerProject, error) {
@@ -79,10 +79,10 @@ func (q *Queries) GetCPEById(ctx context.Context, id string) (CpePerProject, err
 const storeCPE = `-- name: StoreCPE :one
 INSERT INTO cpe_per_project (cpe, created_at, updated_at, project_id)
 VALUES (
-    $1,
-    $2,
-    $3,
-    $4
+    ?,
+    ?,
+    ?,
+    ?
 )
 RETURNING id, cpe, created_at, updated_at, project_id
 `

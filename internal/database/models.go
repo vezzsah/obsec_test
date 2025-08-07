@@ -4,12 +4,6 @@
 
 package database
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
-
 type CpePerProject struct {
 	ID        string `json:"id"`
 	Cpe       string `json:"cpe"`
@@ -30,17 +24,17 @@ type CvePerProject struct {
 }
 
 type Project struct {
-	ID          string    `json:"id"`
-	ProjectName string    `json:"project_name"`
-	CreatedAt   string    `json:"created_at"`
-	UpdatedAt   string    `json:"updated_at"`
-	Creator     uuid.UUID `json:"creator"`
+	ID          *string     `json:"id"`
+	ProjectName string      `json:"project_name"`
+	CreatedAt   string      `json:"created_at"`
+	UpdatedAt   string      `json:"updated_at"`
+	Creator     interface{} `json:"creator"`
 }
 
 type User struct {
-	ID        string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Hashedp   string    `json:"hashedp"`
+	ID        *string `json:"id"`
+	CreatedAt string  `json:"created_at"`
+	UpdatedAt string  `json:"updated_at"`
+	Email     string  `json:"email"`
+	Hashedp   string  `json:"hashedp"`
 }

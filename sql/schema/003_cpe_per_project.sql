@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE cpe_per_project (
-    id TEXT UNIQUE DEFAULT (uuid()) NOT NULL,
+    id TEXT UNIQUE DEFAULT (uuid7()) NOT NULL,
     cpe TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
