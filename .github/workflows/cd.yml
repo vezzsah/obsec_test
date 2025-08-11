@@ -23,17 +23,14 @@ jobs:
         with:
           go-version: "1.23.0"
 
-      - name: GO Mod Tidy.
+      - name: Go Mod Tidy.
         run: go mod tidy
 
-      #- name: GO Mod Vendor.
-      #  run: go mod vendor
+      - name: Go Mod Vendor.
+        run: go mod vendor
 
       - name: Build app.
         run: ./scripts/buildprod.sh
-
-      - name: Set up Goose.
-        run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
       - name: 'GCP Auth'
         uses: 'google-github-actions/auth@v2'
