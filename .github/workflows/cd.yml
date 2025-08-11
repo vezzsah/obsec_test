@@ -23,6 +23,12 @@ jobs:
         with:
           go-version: "1.23.0"
 
+      - name: GO Mod Tidy.
+        run: go mod tidy
+
+      #- name: GO Mod Vendor.
+      #  run: go mod vendor
+
       - name: Build app.
         run: ./scripts/buildprod.sh
 
