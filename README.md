@@ -44,12 +44,12 @@ Once that is done, you can use the following command to have HELM create the rel
 Integration with GCP is still pending for this project.
 
 ## API Usage
-# Clear all users and their projects:
-* DELETE http://localhost:8080/v1/users
+* Clear all users and their projects:
+# DELETE http://localhost:8080/v1/users
 This will delete all the users. Given that the other tables have the constraint "ON DELETE CASCADE", this will result in clearing the Database. Only allowed on a Dev environment.
 
-# Create a user:
-* POST http://localhost:8080/v1/users
+* Create a user:
+# POST http://localhost:8080/v1/users
 example Body:
 ```sh
 {
@@ -59,8 +59,8 @@ example Body:
 ```
 Creates a new user in the DB.
 
-# Get a Log In Token: 
-* POST http://localhost:8080/v1/login
+* Get a Log In Token: 
+# POST http://localhost:8080/v1/login
 example Body:
 ```sh
 {
@@ -70,8 +70,8 @@ example Body:
 ```
 Log In as the given user. If the password is correct, a JWT is generated.
 
-# Create a new Project:
-* POST http://localhost:8080/v1/projects
+* Create a new Project:
+# POST http://localhost:8080/v1/projects
 example Body:
 ```sh
 {
@@ -80,12 +80,12 @@ example Body:
 ```
 Creates a new project under the current user.
 
-# Get Project Details: 
-* GET http://localhost:8080/v1/projects?project_name=test_project
+* Get Project Details: 
+# GET http://localhost:8080/v1/projects?project_name=test_project
 Gets the project details.
 
-# Assing a CPE to a Project: 
-* POST http://localhost:8080/v1/projects/cpes
+* Assing a CPE to a Project: 
+# POST http://localhost:8080/v1/projects/cpes
 example Body:
 ```sh
 {
@@ -100,12 +100,12 @@ example Body:
 ```
 Assing a new CPE to the project. If the CPE is valid (currently checked against mocked data) it will populate the corresponding CVEs also.
 
-# Get all CVEs associated to Project: 
-* GET http://localhost:8080/v1/projects/cves?project_name=test_project
+* Get all CVEs associated to Project: 
+# GET http://localhost:8080/v1/projects/cves?project_name=test_project
 Get all the CVE found for the CPEs assigned to the project.
 
-# Resolve a given CVE: 
-* POST http://localhost:8080/v1/projects/cves?project_name=test_project
+* Resolve a given CVE: 
+# POST http://localhost:8080/v1/projects/cves?project_name=test_project
 Example Body:
 ```sh
 {

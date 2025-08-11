@@ -11,7 +11,6 @@ jobs:
     timeout-minutes: 20
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
       GOFLAGS: -mod=vendor
       GOPROXY: "https://proxy.golang.org,direct"
       
@@ -30,39 +29,54 @@ jobs:
       - name: Set up Goose.
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
-      - name: Run DB Migration.
-        run: ./scripts/migrateup.sh
-
       - name: 'GCP Auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          workload_identity_provider: 'projects/320263482444/locations/global/workloadIdentityPools/github-actions-pool/providers/github'
+          service_account: 'sa-obsec-challange@obsec-challenge.iam.gserviceaccount.com'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: "Connect to GKE"
-        uses: google-github-actions/get-gke-credentials@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-            cluster_name: ""
-            location: us-central1
-            project_id: "" #TODO UPDATE AS REQUIRED
+          terraform_version: "1.12.2"
 
-      - name: 'Upload image to registry'
-        run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-467523/notely-ar-repo/notely:latest . #CORRECT THIS LINE
+      - name: Terraform Init
+        run: terraform init ./infra
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v4.3.0
-        with:
-          version: "v3.18.4"
-      
-      - name: Deploy Helm
-        run: |
-          Multi Line HERE 
-      
-      - name: Monitor Deployment
-        run: |
-          Kubectl get deploy -n ${GITHUB_REPOSITORY#*/} --no-headers
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan ./infra -input=false
+
+
+      - name: Terraform Apply
+        run: terraform apply ./infra -auto-approve -input=false
+#
+#      - name: "Connect to GKE"
+#        uses: google-github-actions/get-gke-credentials@v2
+#        with:
+#            cluster_name: ""
+##            location: us-central1
+ #           project_id: "" #TODO UPDATE AS REQUIRED
+#
+#      - name: 'Upload image to registry'
+#        run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-467523/notely-ar-repo/notely:latest . #CORRECT THIS LINE
+#
+#      - name: Set up Helm
+#        uses: azure/setup-helm@v4.3.0
+#        with:
+#          version: "v3.18.4"
+#      
+#      - name: Deploy Helm
+#        run: |
+#          Multi Line HERE 
+#      
+#      - name: Monitor Deployment
+#        run: |
+#          Kubectl get deploy -n ${GITHUB_REPOSITORY#*/} --no-headers
 
       #- name: Deploy to Cloud Run
       #  run: gcloud run deploy notely --image us-central1-docker.pkg.dev/notely-467523/notely-ar-repo/notely:latest --region us-central1 --allow-unauthenticated --project notely-467523 --max-instances=4
