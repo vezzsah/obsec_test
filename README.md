@@ -20,8 +20,9 @@ You can execute the code with
 go build -o obsec-server && ./obsec-server
 ```
 
-For HELM execution, have a minikube service running, and create a configmap.yaml under ./obsec-chart/templates
-The file should contain the following:
+For HELM execution, have a minikube service running, and create the fields TOKEN_TYPE and DATABASE_URL inside the 
+configmap.yaml under ./obsec-chart/templates
+The file should look like the following:
 ```sh
 apiVersion: "v1"
 kind: ConfigMap
@@ -34,7 +35,7 @@ data:
   SECRET_KEY: "Add a random secret key here"
   DATABASE_URL: ${DATABASE_URL} 
 ```
-Secret management in this project is still pending.
+Secret management with gcp in this project is still pending.
 Once that is done, you can use the following command to have HELM create the release.
 ```sh
 ./scripts/helminstall.sh
