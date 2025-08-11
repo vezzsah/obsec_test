@@ -1,2 +1,4 @@
 .env
 obsec-server
+infra/.terraform/*
+infra/.terraform/**/

@@ -51,16 +51,18 @@ jobs:
           terraform_version: "1.12.2"
 
       - name: Terraform Init
-        run: terraform init ./infra
-
+        run: terraform init
+        working-directory: ./infra
 
       # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan ./infra -input=false
+        run: terraform plan -input=false
+        working-directory: ./infra
 
 
       - name: Terraform Apply
-        run: terraform apply ./infra -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false
+        working-directory: ./infra
 #
 #      - name: "Connect to GKE"
 #        uses: google-github-actions/get-gke-credentials@v2
