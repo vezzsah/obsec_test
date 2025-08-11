@@ -1,4 +1,4 @@
-resource "google_service_account" "default" {
+resource "google_service_account" "gke-sa" {
   account_id   = "gke-sa-obsec"
   display_name = "GKE Service Account"
   project      = var.project
@@ -7,7 +7,7 @@ resource "google_service_account" "default" {
 resource "google_container_cluster" "primary" {
   name                      = "obsec-gke-cluster"
   location                  = var.zone
-  default_max_pods_per_node = 2
+  default_max_pods_per_node = 8
 
   release_channel {
     channel = "STABLE"
