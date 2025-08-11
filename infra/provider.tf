@@ -1,4 +1,4 @@
 provider "google" {
-  project = "obsec-challenge"
-  region  = "us-central1"
+  project = var.project
+  region  = var.region
 }
