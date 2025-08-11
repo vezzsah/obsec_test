@@ -1,0 +1,8 @@
+apiVersion: "v1"
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configmapName }}
+data:
+  PORT: "8080"
+  ENVIRONMENT: "dev"
+  TOKEN_TYPE: {{ .Values.tokenType }}

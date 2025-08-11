@@ -6,6 +6,8 @@ configmapName: obsec-service-configmap
 
 tokenType: "obsec-api-access"
 
+ksaname: "ksa-obsec-challenge"
+
 image:
   repository: gomaeba/obsec-server
   pullPolicy: Always

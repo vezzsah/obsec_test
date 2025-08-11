@@ -1,0 +1,6 @@
+# ksa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.ksaname }}
+  namespace: {{ .Values.namespace }}
