@@ -2,3 +2,4 @@
 obsec-server
 infra/.terraform/*
 infra/.terraform/**/
+infra/.terraform.lock.hcl
