@@ -21,7 +21,7 @@ spec:
           driver: secrets-store-gke.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: GKE_Secrets
+            secretProviderClass: {{ .Values.sercretprovider }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
