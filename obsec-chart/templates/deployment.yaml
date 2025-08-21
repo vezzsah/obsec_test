@@ -15,10 +15,22 @@ spec:
       labels:
         app: {{ .Values.fullname }}
     spec:
+      volumes:
+      - name: {{ .Values.volname }}
+        csi:
+          driver: secrets-store-gke.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: GKE_Secrets
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: "/"
+              name: {{ .Values.volname }}
           envFrom:
           - configMapRef:
               name: {{ .Values.configmapName }}

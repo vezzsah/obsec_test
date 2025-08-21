@@ -32,6 +32,10 @@ resource "google_container_cluster" "primary" {
     workload_pool = "${var.project}.svc.id.goog"
   }
 
+  secret_manager_config {
+    enabled = true
+  }
+
 }
 
 resource "google_container_node_pool" "obsec-challenge-pool" {

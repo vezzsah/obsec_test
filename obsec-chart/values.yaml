@@ -8,6 +8,8 @@ tokenType: "obsec-api-access"
 
 ksaname: "ksa-obsec-challenge"
 
+volname: "secrets-volume"
+
 image:
   repository: gomaeba/obsec-server
   pullPolicy: Always
