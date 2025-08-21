@@ -76,8 +76,8 @@ jobs:
       - name: Helm - Install CSI Plugin
         run: |
           helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
-          helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace obsec-challenge
+          helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace obsec-challenge --create-namespace
 
       - name: Helm - Install Server Chart
         run: |
-          helm upgrade --install obsec-server ./obsec-chart --namespace obsec-challenge
+          helm upgrade --install obsec-server ./obsec-chart --namespace obsec-challenge --create-namespace
