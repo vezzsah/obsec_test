@@ -65,6 +65,7 @@ jobs:
 
       - name: Get GKE credentials
         run: |
+          gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials obsec-gke-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT }}
 
       - name: Install Helm
