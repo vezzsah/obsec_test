@@ -59,10 +59,18 @@ jobs:
         run: terraform plan -input=false
         working-directory: ./infra
 
-
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
         working-directory: ./infra
 
-      - name: Helm Install
-        run: helm install obsec-server ./obsec-chart --namespace obsec-challenge
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials obsec-gke-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.18.4
+
+      - name: Helm Install Chart
+        run: helm upgrade --install obsec-server ./obsec-chart --namespace obsec-challenge
