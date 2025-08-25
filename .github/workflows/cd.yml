@@ -54,31 +54,35 @@ jobs:
         run: terraform init
         working-directory: ./infra
 
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
+        working-directory: ./infra
+
       # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        run: terraform plan -input=false
-        working-directory: ./infra
+      #- name: Terraform Plan
+      #  run: terraform plan -input=false
+      #  working-directory: ./infra
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
-        working-directory: ./infra
+      #- name: Terraform Apply
+      #  run: terraform apply -auto-approve -input=false
+      #  working-directory: ./infra
 
-      - name: Get GKE credentials
-        run: |
-          gcloud components install gke-gcloud-auth-plugin
-          gcloud container clusters get-credentials obsec-gke-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT }}
+      #- name: Get GKE credentials
+      #  run: |
+      #    gcloud components install gke-gcloud-auth-plugin
+      #    gcloud container clusters get-credentials obsec-gke-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT }}
 
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.18.4
+      #- name: Install Helm
+      #  uses: azure/setup-helm@v4
+      #  with:
+      #    version: v3.18.4
 
-      - name: Helm - Install CSI Plugin
-        run: |
-          helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
-          helm repo update
-          helm upgrade -i csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace obsec-challenge --create-namespace
+      #- name: Helm - Install CSI Plugin
+      #  run: |
+      #    helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
+      #    helm repo update
+      #    helm upgrade -i csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace obsec-challenge --create-namespace
 
-      - name: Helm - Install Server Chart
-        run: |
-          helm upgrade --install obsec-server ./obsec-chart --namespace obsec-challenge --create-namespace
+      #- name: Helm - Install Server Chart
+      #  run: |
+      #    helm upgrade --install obsec-server ./obsec-chart --namespace obsec-challenge --create-namespace
